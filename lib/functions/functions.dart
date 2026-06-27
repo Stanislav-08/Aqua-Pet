@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//streak modal
 void showStreakModal(
     BuildContext context, {
       required int currentStreak,

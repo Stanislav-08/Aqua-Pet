@@ -1,8 +1,13 @@
 import 'package:aqua_pet/elements/bottom_navigation.dart';
+import 'package:aqua_pet/services/notification_service.dart';
 import 'package:aqua_pet/theme/app_themes.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

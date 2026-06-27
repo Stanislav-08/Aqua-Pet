@@ -1,3 +1,4 @@
+import 'package:aqua_pet/data/data_structures.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:aqua_pet/layers/calendar_page.dart';
@@ -16,19 +17,7 @@ class BottomNavigation extends StatefulWidget {
 class _BottomNavigation extends State<BottomNavigation> {
   int index = 0;
 
-  final List<Widget> pages = const [
-    HomePage(),
-    ReminderPage(),
-    CalendarPage(),
-    ProfilePage(),
-  ];
 
-  final List<IconData> icons = const [
-    Icons.home_rounded,
-    Icons.notifications_rounded,
-    Icons.calendar_month_rounded,
-    Icons.person_rounded,
-  ];
 
   @override
   Widget build(BuildContext context) {
