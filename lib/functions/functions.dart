@@ -1,3 +1,4 @@
+import 'package:aqua_pet/data/models/reminder.dart';
 import 'package:flutter/material.dart';
 
 //streak modal
@@ -13,7 +14,7 @@ void showStreakModal(
     ),
     builder: (_) {
       return Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -37,7 +38,7 @@ void showStreakModal(
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
           ],
         ),
       );
@@ -60,5 +61,167 @@ Widget _streakTile({
       ),
       Text(label, style: const TextStyle(fontSize: 12)),
     ],
+  );
+}
+
+// custom intake modal
+void showCustomIntakeModal(BuildContext context, VoidCallback onAdd) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) {
+      final keyboardHeight = MediaQuery
+          .of(context)
+          .viewInsets
+          .bottom;
+
+      return SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Milliliters',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    onAdd();
+                  },
+                  child: Text('Add water'),
+                ),
+                SizedBox(height: keyboardHeight),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+// reminder modal
+void showReminderModal(
+    BuildContext context,
+    Function(Reminder) onSave,
+    ) {
+  bool isFirstOption = true;
+  int? selectedStartHour = 22;
+  int? selectedEndHour = 7;
+
+  final nameController = TextEditingController();
+  final repeatController = TextEditingController();
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) {
+      final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+      return StatefulBuilder(
+        builder: (context, setModalState) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Reminder name',
+                      ),
+                    ),
+                    TextField(
+                      controller: repeatController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Repeat every',
+                      ),
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Bed time'),
+                        Switch(
+                          value: isFirstOption,
+                          onChanged: (value) {
+                            setModalState(() {
+                              isFirstOption = value;
+                            });
+                          },
+                        ),
+                        if (isFirstOption) ...[
+                          const Text('From '),
+                          DropdownButton<int>(
+                            value: selectedStartHour,
+                            items: List.generate(
+                              24,
+                                  (i) => DropdownMenuItem(
+                                value: i + 1,
+                                child: Text('${i + 1}'),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setModalState(() {
+                                selectedStartHour = value!;
+                              });
+                            },
+                          ),
+                          const Text('to'),
+                          DropdownButton<int>(
+                            value: selectedEndHour,
+                            items: List.generate(
+                              24,
+                                  (i) => DropdownMenuItem(
+                                value: i + 1,
+                                child: Text('${i + 1}'),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setModalState(() {
+                                selectedEndHour = value!;
+                              });
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        final reminder = Reminder(
+                          name: nameController.text,
+                          repeatEvery: int.parse(repeatController.text),
+                          bedTime: isFirstOption,
+                          startHour: selectedStartHour,
+                          endHour: selectedEndHour,
+                        );
+
+                        onSave(reminder);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Save'),
+                    ),
+
+                    SizedBox(height: keyboardHeight),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
   );
 }

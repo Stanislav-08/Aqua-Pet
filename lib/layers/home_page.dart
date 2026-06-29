@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, this.isActive = true});
+
+  /// Whether this page is the one currently shown in the bottom
+  /// navigation. Used to release the 3D plant viewer when the user
+  /// switches to a different tab.
+  final bool isActive;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -25,7 +30,8 @@ class _HomePageState extends State<HomePage> {
   void _onWaterTap() {
     if (!isModelLoaded.value) return; // ignore taps before model is ready
 
-    controller.playAnimation(animationName: 'watering_can_action', loopCount: 1);
+    controller.playAnimation(
+        animationName: 'watering_can_action', loopCount: 1);
     Future.delayed(const Duration(milliseconds: 2500), () {
       controller.resetAnimation();
       controller.pauseAnimation();
@@ -37,7 +43,10 @@ class _HomePageState extends State<HomePage> {
     const screenPadding = 16.0;
     const strokeWidth = 16.0;
 
-    double boxSize = MediaQuery.of(context).size.width - (screenPadding * 2);
+    double boxSize = MediaQuery
+        .of(context)
+        .size
+        .width - (screenPadding * 2);
 
     return Scaffold(
       body: SafeArea(
@@ -50,11 +59,12 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     GestureDetector(
-                      onTap: () => showStreakModal(
-                        context,
-                        currentStreak: 3,
-                        bestStreak: 10,
-                      ),
+                      onTap: () =>
+                          showStreakModal(
+                            context,
+                            currentStreak: 3,
+                            bestStreak: 10,
+                          ),
                       child: Container(
                         width: 64,
                         height: 64,
@@ -91,6 +101,7 @@ class _HomePageState extends State<HomePage> {
                       PlantView(
                         controller: controller,
                         isModelLoaded: isModelLoaded,
+                        isActive: widget.isActive,
                       ),
 
                       Positioned(
@@ -129,13 +140,38 @@ class _HomePageState extends State<HomePage> {
                         );
                       }).toList(),
                     ),
-                    FloatingActionButton(onPressed: ()=> NotificationService.showNotification(
-                      title: "Water reminder",
-                      body: "Your plant needs water",
+
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isModelLoaded,
+                      builder: (context, loaded, _) {
+                        return GestureDetector(
+                          onTap: loaded
+                              ? () => showCustomIntakeModal(context, _onWaterTap)
+                              : null,
+                          child: Container(
+                            width: boxSize,
+                            height: 48,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: loaded ? Colors.white : Colors.grey,
+                            ),
+                            child: const Text('Custom'),
+                          ),
+                        );
+                      },
                     ),
+
+                    FloatingActionButton(
+                      onPressed: () {
+                        NotificationService.showNotification(
+                          title: "Water reminder",
+                          body: "Your plant needs water",
+                        );
+                      },
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),

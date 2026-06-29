@@ -1,10 +1,10 @@
 import 'package:aqua_pet/data/data_structures.dart';
-import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'package:aqua_pet/layers/calendar_page.dart';
 import 'package:aqua_pet/layers/home_page.dart';
-import 'package:aqua_pet/layers/reminder_page.dart';
 import 'package:aqua_pet/layers/profile_page.dart';
+import 'package:aqua_pet/layers/reminder_page.dart';
+import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
 class BottomNavigation extends StatefulWidget {
@@ -21,6 +21,15 @@ class _BottomNavigation extends State<BottomNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    // Built here (not as a static const list) so HomePage can be
+    // told whether it's the currently visible tab.
+    final List<Widget> pages = [
+      HomePage(isActive: index == 0),
+      const ReminderPage(),
+      const CalendarPage(),
+      const ProfilePage(),
+    ];
+
     return BottomBar(
       layout: BottomBarLayout(
         width: MediaQuery.of(context).size.width,
