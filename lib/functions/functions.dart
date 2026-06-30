@@ -65,15 +65,17 @@ Widget _streakTile({
 }
 
 // custom intake modal
-void showCustomIntakeModal(BuildContext context, VoidCallback onAdd) {
+void showCustomIntakeModal(
+    BuildContext context,
+    void Function(int value) onAdd,
+    ) {
+  final controller = TextEditingController();
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     builder: (context) {
-      final keyboardHeight = MediaQuery
-          .of(context)
-          .viewInsets
-          .bottom;
+      final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
       return SafeArea(
         child: SingleChildScrollView(
@@ -83,19 +85,27 @@ void showCustomIntakeModal(BuildContext context, VoidCallback onAdd) {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
+                  controller: controller,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Milliliters',
                   ),
                 ),
+
                 const SizedBox(height: 16),
+
                 FloatingActionButton(
                   onPressed: () {
+                    final value = int.tryParse(controller.text);
+
+                    if (value == null || value <= 0) return;
+
                     Navigator.pop(context);
-                    onAdd();
+                    onAdd(value);
                   },
-                  child: Text('Add water'),
+                  child: const Text('Add water'),
                 ),
+
                 SizedBox(height: keyboardHeight),
               ],
             ),

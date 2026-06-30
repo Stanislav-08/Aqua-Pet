@@ -28,9 +28,9 @@ class ProfilePage extends StatelessWidget {
                         height: 64,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(32),
-                          color: Colors.red,
+                          color: Colors.blue,
                         ),
-                        child: const Icon(Icons.local_fire_department_rounded),
+                        child: const Icon(Icons.settings),
                       ),
                     ),
                   ],
