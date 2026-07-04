@@ -1,11 +1,9 @@
 import 'package:aqua_pet/data/data_structures.dart';
 import 'package:aqua_pet/data/models/daily_water_intake.dart';
-import 'package:aqua_pet/elements/plant_view.dart';
+import 'package:aqua_pet/elements/plant3D.dart';
 import 'package:aqua_pet/functions/functions.dart';
 import 'package:aqua_pet/services/notification_service.dart';
-import 'package:aqua_pet/services/weather_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, this.isActive = true});
@@ -20,9 +18,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Flutter3DController controller = Flutter3DController();
+  final GlobalKey<Plant3DState> plantKey = GlobalKey();
   final ValueNotifier<bool> isModelLoaded = ValueNotifier(false);
+
   int currentIntake = 0;
+
+  void _onWaterTap(int water) {
+    final plant = plantKey.currentState;
+
+    if (plant == null || !plant.loaded) return;
+
+    setState(() {
+      currentIntake += water;
+    });
+
+    plant.playWaterAnimation();
+  }
 
   @override
   void dispose() {
@@ -30,33 +41,18 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _onWaterTap(int water) {
-    if (!isModelLoaded.value) return;
-
-    setState(() {
-      currentIntake += water;
-    });
-
-    controller.playAnimation(
-      animationName: 'watering_can_action',
-      loopCount: 1,
-    );
-
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      controller.resetAnimation();
-      controller.pauseAnimation();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     const screenPadding = 16.0;
     const strokeWidth = 16.0;
-    int dailyIntake =DailyWaterIntake.calculate(weightKg: 60, activityLevel: 'moderate');
-    double boxSize = MediaQuery
-        .of(context)
-        .size
-        .width - (screenPadding * 2);
+
+    final dailyIntake = DailyWaterIntake.calculate(
+      weightKg: 60,
+      activityLevel: 'moderate',
+    );
+
+    final boxSize =
+        MediaQuery.of(context).size.width - (screenPadding * 2);
 
     return Scaffold(
       body: SafeArea(
@@ -69,12 +65,11 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     GestureDetector(
-                      onTap: () =>
-                          showStreakModal(
-                            context,
-                            currentStreak: 3,
-                            bestStreak: 10,
-                          ),
+                      onTap: () => showStreakModal(
+                        context,
+                        currentStreak: 3,
+                        bestStreak: 10,
+                      ),
                       child: Container(
                         width: 64,
                         height: 64,
@@ -82,7 +77,9 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(32),
                           color: Colors.red,
                         ),
-                        child: const Icon(Icons.local_fire_department_rounded),
+                        child: const Icon(
+                          Icons.local_fire_department_rounded,
+                        ),
                       ),
                     ),
                   ],
@@ -91,7 +88,9 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   width: boxSize,
                   height: boxSize,
-                  decoration: const BoxDecoration(color: Colors.blue),
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                  ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -100,7 +99,8 @@ class _HomePageState extends State<HomePage> {
                         height: boxSize,
                         padding: const EdgeInsets.all(strokeWidth / 2),
                         child: CircularProgressIndicator(
-                          value: (currentIntake/dailyIntake).clamp(0.0, 1.0),
+                          value: (currentIntake / dailyIntake)
+                              .clamp(0.0, 1.0),
                           color: Colors.yellow,
                           strokeWidth: strokeWidth,
                           backgroundColor: Colors.white,
@@ -108,17 +108,20 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
 
-                      PlantView(
-                        controller: controller,
-                        isModelLoaded: isModelLoaded,
+                      Plant3D(
+                        key: plantKey,
                         isActive: widget.isActive,
+                        isModelLoaded: isModelLoaded,
                       ),
 
                       Positioned(
                         top: boxSize - 48,
                         child: Text(
-                          '${currentIntake}ml/${dailyIntake/1000 - (dailyIntake/1000 % 0.1)}L',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          '${currentIntake}ml/${(dailyIntake / 1000).toStringAsFixed(1)}L',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -128,22 +131,28 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
                       children: intakes.entries.map((entry) {
                         return ValueListenableBuilder<bool>(
-                          valueListenable: isModelLoaded,
+                            valueListenable: isModelLoaded,
                           builder: (context, loaded, _) {
                             return GestureDetector(
-                              onTap: loaded ? ()=> _onWaterTap(entry.value) : null,
+                              onTap: loaded
+                                  ? () => _onWaterTap(entry.value)
+                                  : null,
                               child: Container(
                                 width: 80,
                                 height: 48,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  color: loaded ? Colors.white : Colors.grey,
+                                  borderRadius:
+                                  BorderRadius.circular(16),
+                                  color: loaded
+                                      ? Colors.white
+                                      : Colors.grey,
                                 ),
-                                child: Text('${entry.key}'),
+                                child: Text(entry.key),
                               ),
                             );
                           },
@@ -156,15 +165,21 @@ class _HomePageState extends State<HomePage> {
                       builder: (context, loaded, _) {
                         return GestureDetector(
                           onTap: loaded
-                              ? () => showCustomIntakeModal(context, _onWaterTap)
+                              ? () => showCustomIntakeModal(
+                            context,
+                            _onWaterTap,
+                          )
                               : null,
                           child: Container(
                             width: boxSize,
                             height: 48,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: loaded ? Colors.white : Colors.grey,
+                              borderRadius:
+                              BorderRadius.circular(16),
+                              color: loaded
+                                  ? Colors.white
+                                  : Colors.grey,
                             ),
                             child: const Text('Custom'),
                           ),
@@ -175,13 +190,13 @@ class _HomePageState extends State<HomePage> {
                     FloatingActionButton(
                       onPressed: () {
                         NotificationService.showNotification(
-                          title: "Water reminder",
-                          body: "Your plant needs water",
+                          title: 'Water reminder',
+                          body: 'Your plant needs water',
                         );
                       },
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
