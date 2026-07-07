@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_3d_controller/flutter_3d_controller.dart';
 
 class Plant3D extends StatefulWidget {
   const Plant3D({
@@ -20,6 +21,7 @@ class Plant3D extends StatefulWidget {
 
 class Plant3DState extends State<Plant3D> {
   final GlobalKey _boundaryKey = GlobalKey();
+  final Flutter3DController _controller = Flutter3DController();
 
   ui.Image? _snapshot;
   bool _showSnapshot = false;
@@ -41,7 +43,7 @@ class Plant3DState extends State<Plant3D> {
     super.initState();
 
     _refreshTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      if (widget.isActive && !_showSnapshot) {
+      if (widget.isActive && loaded && !_showSnapshot) {
         _captureSnapshot();
       }
     });
@@ -68,7 +70,7 @@ class Plant3DState extends State<Plant3D> {
       if (renderObject is! RenderRepaintBoundary) return;
       if (renderObject.debugNeedsPaint) return;
 
-      final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+      final pixelRatio = MediaQuery.devicePixelRatioOf(context);
       final image = await renderObject.toImage(pixelRatio: pixelRatio);
 
       final old = _snapshot;
@@ -82,7 +84,6 @@ class Plant3DState extends State<Plant3D> {
       old?.dispose();
     } catch (_) {}
   }
-
   @override
   void dispose() {
     _revealTimer?.cancel();
@@ -103,9 +104,13 @@ class Plant3DState extends State<Plant3D> {
           offstage: useSnapshot,
           child: RepaintBoundary(
             key: _boundaryKey,
-            child: (
+            child: Flutter3DViewer(
               src: 'assets/models/cactus.glb',
+              controller: _controller,
               enableTouch: false,
+              onLoad: (String modelAddress) {
+                _controller.setCameraOrbit(20, 20, 5); // <-- set your desired starting orbit here
+              },
             ),
           ),
         ),
