@@ -1,8 +1,8 @@
 import 'package:aqua_pet/data/data_structures.dart';
-import 'package:aqua_pet/layers/calendar_page.dart';
-import 'package:aqua_pet/layers/home_page.dart';
-import 'package:aqua_pet/layers/profile_page.dart';
-import 'package:aqua_pet/layers/reminder_page.dart';
+import 'package:aqua_pet/layers/pages/calendar_page.dart';
+import 'package:aqua_pet/layers/pages/home_page.dart';
+import 'package:aqua_pet/layers/pages/profile_page.dart';
+import 'package:aqua_pet/layers/pages/reminder_page.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';

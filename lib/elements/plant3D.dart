@@ -34,8 +34,11 @@ class Plant3DState extends State<Plant3D> {
   bool get loaded => widget.isModelLoaded.value;
 
   void playWaterAnimation() {
-    // NOT SUPPORTED in this package version
-    // remove or replace with model animation trigger if available
+    _controller.playAnimation(animationName: 'watering_can_action', loopCount: 1);
+
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      _controller.stopAnimation();
+    });
   }
 
   @override
@@ -97,7 +100,11 @@ class Plant3DState extends State<Plant3D> {
     final snapshot = _snapshot;
     final useSnapshot = _showSnapshot && snapshot != null;
 
-    return Stack(
+    return SizedBox(
+      width: MediaQuery.of(context).size.width - (16 * 2),
+      height: MediaQuery.of(context).size.width - (16 * 2),
+      child: const Placeholder(),
+      /*Stack(
       fit: StackFit.expand,
       children: [
         Offstage(
@@ -105,11 +112,12 @@ class Plant3DState extends State<Plant3D> {
           child: RepaintBoundary(
             key: _boundaryKey,
             child: Flutter3DViewer(
-              src: 'assets/models/cactus.glb',
+              src: 'assets/models/plant.glb',
               controller: _controller,
               enableTouch: false,
               onLoad: (String modelAddress) {
-                _controller.setCameraOrbit(20, 20, 5); // <-- set your desired starting orbit here
+                widget.isModelLoaded.value = true;
+                _controller.setCameraOrbit(0, 75,500);
               },
             ),
           ),
@@ -120,7 +128,7 @@ class Plant3DState extends State<Plant3D> {
             image: snapshot,
             fit: BoxFit.contain,
           ),
-      ],
+      ],*/
     );
   }
 }

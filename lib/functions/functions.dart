@@ -121,12 +121,15 @@ void showReminderModal(
     BuildContext context,
     Function(Reminder) onSave,
     ) {
-  bool isFirstOption = true;
-  int? selectedStartHour = 22;
-  int? selectedEndHour = 7;
+  bool isBedTimeEnabled = true;
+
+  int repeatHours = 2;
+  int repeatMinutes = 0;
+
+  int selectedStartHour = 22;
+  int selectedEndHour = 7;
 
   final nameController = TextEditingController();
-  final repeatController = TextEditingController();
 
   showModalBottomSheet(
     context: context,
@@ -149,35 +152,84 @@ void showReminderModal(
                         labelText: 'Reminder name',
                       ),
                     ),
-                    TextField(
-                      controller: repeatController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Repeat every',
-                      ),
-                    ),
+
+                    const SizedBox(height: 20),
 
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Bed time'),
-                        Switch(
-                          value: isFirstOption,
+                        const Text(
+                          'Repeat every',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        const Spacer(),
+
+                        DropdownButton<int>(
+                          value: repeatHours,
+                          items: List.generate(
+                            24,
+                                (i) => DropdownMenuItem(
+                              value: i,
+                              child: Text("${i} h"),
+                            ),
+                          ),
                           onChanged: (value) {
                             setModalState(() {
-                              isFirstOption = value;
+                              repeatHours = value!;
                             });
                           },
                         ),
-                        if (isFirstOption) ...[
-                          const Text('From '),
+
+                        const SizedBox(width: 16),
+
+                        DropdownButton<int>(
+                          value: repeatMinutes,
+                          items: List.generate(
+                            12,
+                                (i) => DropdownMenuItem(
+                              value: i * 5,
+                              child: Text("${i * 5} m"),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setModalState(() {
+                              repeatMinutes = value!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        const Text("Disable during bedtime"),
+                        const Spacer(),
+                        Switch(
+                          value: isBedTimeEnabled,
+                          onChanged: (value) {
+                            setModalState(() {
+                              isBedTimeEnabled = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+
+                    if (isBedTimeEnabled)
+                      Row(
+                        children: [
+                          const Text("From"),
+
+                          const SizedBox(width: 12),
+
                           DropdownButton<int>(
                             value: selectedStartHour,
                             items: List.generate(
                               24,
                                   (i) => DropdownMenuItem(
-                                value: i + 1,
-                                child: Text('${i + 1}'),
+                                value: i,
+                                child: Text("${i.toString().padLeft(2, '0')}:00"),
                               ),
                             ),
                             onChanged: (value) {
@@ -186,14 +238,20 @@ void showReminderModal(
                               });
                             },
                           ),
-                          const Text('to'),
+
+                          const SizedBox(width: 20),
+
+                          const Text("To"),
+
+                          const SizedBox(width: 12),
+
                           DropdownButton<int>(
                             value: selectedEndHour,
                             items: List.generate(
                               24,
                                   (i) => DropdownMenuItem(
-                                value: i + 1,
-                                child: Text('${i + 1}'),
+                                value: i,
+                                child: Text("${i.toString().padLeft(2, '0')}:00"),
                               ),
                             ),
                             onChanged: (value) {
@@ -203,25 +261,37 @@ void showReminderModal(
                             },
                           ),
                         ],
-                      ],
-                    ),
+                      ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
-                    ElevatedButton(
-                      onPressed: () {
-                        final reminder = Reminder(
-                          name: nameController.text,
-                          repeatEvery: int.parse(repeatController.text),
-                          bedTime: isFirstOption,
-                          startHour: selectedStartHour,
-                          endHour: selectedEndHour,
-                        );
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final reminder = Reminder(
+                            name: nameController.text,
+                            repeatEvery: Duration(
+                              hours: repeatHours,
+                              minutes: repeatMinutes,
+                            ),
+                            bedTime: isBedTimeEnabled,
+                            startHour: selectedStartHour,
+                            endHour: selectedEndHour,
+                            nextNotification: DateTime.now().add(
+                              Duration(
+                                hours: repeatHours,
+                                minutes: repeatMinutes,
+                              ),
+                            ),
+                          );
 
-                        onSave(reminder);
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Save'),
+                          onSave(reminder);
+
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Save"),
+                      ),
                     ),
 
                     SizedBox(height: keyboardHeight),
