@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage>
   final dailyIntake = DailyWaterIntake.calculate(
     weightKg: 60,
     activityLevel: 'moderate',
+    gender: 'male'
   );
 
   int currentIntake = 0;

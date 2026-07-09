@@ -1,5 +1,7 @@
 import 'package:aqua_pet/elements/bottom_navigation.dart';
 import 'package:aqua_pet/layers/background.dart';
+import 'package:aqua_pet/layers/pages/user_info_page.dart';
+import 'package:aqua_pet/services/helpers/user_storage_helper.dart';
 import 'package:aqua_pet/services/location_service.dart';
 import 'package:aqua_pet/services/notification_service.dart';
 import 'package:aqua_pet/services/storage_service.dart';
@@ -44,7 +46,9 @@ class MyApp extends StatelessWidget {
       theme: AppThemes.lightTheme,
       darkTheme: AppThemes.darkTheme,
       themeMode: ThemeMode.system,
-      home: const BottomNavigation(),
+      home: UserStorageHelper.hasUser()
+        ? const BottomNavigation()
+        : const UserInfoPage(),
     );
   }
 }

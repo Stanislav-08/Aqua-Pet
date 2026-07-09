@@ -1,4 +1,6 @@
+import 'package:aqua_pet/data/models/user.dart';
 import 'package:aqua_pet/elements/plant3D.dart';
+import 'package:aqua_pet/services/helpers/user_storage_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:aqua_pet/layers/pages/settings_page.dart';
 
@@ -12,6 +14,19 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final ValueNotifier<bool> isModelLoaded = ValueNotifier(false);
   final GlobalKey<Plant3DState> plantKey = GlobalKey();
+
+  User user = const User(
+    username: '',
+    gender: 'Male',
+    activityLevel: 'moderate',
+    weight: 0,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    user = UserStorageHelper.load();
+  }
 
   @override
   void dispose() {
@@ -35,11 +50,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SettingsPage(),
-                        ),
-                      ),
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SettingsPage(),
+                          ),
+                        );
+
+                        setState(() {
+                          user = UserStorageHelper.load();
+                        });
+                      },
                       child: Container(
                         width: 64,
                         height: 64,
@@ -58,12 +79,42 @@ class _ProfilePageState extends State<ProfilePage> {
                 Container(
                   width: boxSize,
                   height: boxSize,
-                  decoration: const BoxDecoration(color: Colors.blue),
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                  ),
                   child: Plant3D(
                     key: plantKey,
                     isActive: true,
                     isModelLoaded: isModelLoaded,
                   ),
+                ),
+
+                const SizedBox(height: 24),
+
+                Text(
+                  user.username.isEmpty ? 'No username' : user.username,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  'Gender: ${user.gender}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Activity: ${user.activityLevel[0].toUpperCase()}${user.activityLevel.substring(1)}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Weight: ${user.weight.toStringAsFixed(1)} kg',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
 
                 const SizedBox(height: 16),

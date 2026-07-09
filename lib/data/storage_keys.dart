@@ -4,4 +4,5 @@ class StorageKeys {
   static const settings = 'settings';
   static const level = 'level';
   static const experience = 'experience';
+  static const user = 'user';
 }

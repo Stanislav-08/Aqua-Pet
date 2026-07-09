@@ -71,12 +71,14 @@ class StorageService {
     return _prefs.setString(key, jsonEncode(json));
   }
 
-  static Map<String, dynamic>? getJson(String key) {
+  static Map<String, dynamic> getJson(String key) {
     final value = _prefs.getString(key);
 
-    if (value == null) return null;
+    if (value == null) {
+      return {};
+    }
 
-    return jsonDecode(value);
+    return Map<String, dynamic>.from(jsonDecode(value));
   }
 
   // ---------- JSON List ----------
